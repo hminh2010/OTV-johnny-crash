@@ -42,7 +42,11 @@ void setup() {
 
     // TURN ROBOT TOWARDS MISSION SITE
 
-    // MOVE ROBOT TO MISSION SITE
+    // MOVE ROBOT TO MISSION SITE AND DETERMINE X DIMENSION OF THE ABORNAMLITY
+
+    // LOOP EACH SIDE TO DETERMINE REFLECTANCE VALUES
+
+    
 }
 
 void loop() {
@@ -122,7 +126,10 @@ int getDistanceX() {
     return distance;
 }
 
-// Analog pin: A0
+/*
+    Reads reflectance value from the bottom reflectance sensor
+    Analog pin: A0
+*/
 int determineAbnormalityTop() {
     // read the input on analog pin 0:
     int sensorValue = analogRead(A0);
@@ -136,7 +143,11 @@ int determineAbnormalityTop() {
     }
     return sensorValue;
 }
-// Analog pin: A1
+
+/* 
+    Reads reflectance value from the bottom reflectance sensor 
+    Analog pin: A1 
+*/
 int determineAbnormalityBot() {
     // read the input on analog pin 0:
     int sensorValue = analogRead(A1);
