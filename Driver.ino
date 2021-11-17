@@ -7,7 +7,7 @@
 #define trigPinX 13
 
 // possible heights: 26.5cm, 19.1cm, 14cm
-
+// max stepper is 60
 
 const int STEPS_PER_REV =  200;
 
@@ -27,8 +27,8 @@ void setup() {
     // Ultrasonic X
     pinMode(trigPinX, OUTPUT); 
     pinMode(echoPinX, INPUT);
-    // Reflectance 
-
+    
+    
 
     // CONNECTING TO VISION SYSTEM
     while (!Enes100.begin("Johnny Crash", CRASH_SITE, 420, 7, 8)) {
@@ -46,6 +46,7 @@ void setup() {
 
     // LOOP EACH SIDE TO DETERMINE REFLECTANCE VALUES
 
+    //
     
 }
 
@@ -126,11 +127,16 @@ int getDistanceX() {
     return distance;
 }
 
+boolean readSide() {
+    int readingLowtom = determineAbnormalityLow();
+    int readingHigh = determineAbnormalityHigh();
+}
+
 /*
     Reads reflectance value from the bottom reflectance sensor
     Analog pin: A0
 */
-int determineAbnormalityTop() {
+int determineAbnormalityHigh() {
     // read the input on analog pin 0:
     int sensorValue = analogRead(A0);
     // print out the value you read:
@@ -148,7 +154,7 @@ int determineAbnormalityTop() {
     Reads reflectance value from the bottom reflectance sensor 
     Analog pin: A1 
 */
-int determineAbnormalityBot() {
+int determineAbnormalityLow() {
     // read the input on analog pin 0:
     int sensorValue = analogRead(A1);
     // print out the value you read:
@@ -160,4 +166,17 @@ int determineAbnormalityBot() {
     Serial.println(sensorValue);
     }
     return sensorValue;
+}
+
+int calculateHeight() {
+  digitalWrite(12, HIGH);
+  digitalWrite(trigPin, LOW);
+  delay(200);
+  digitalWrite(trigPin, HIGH);
+  delay(100);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance = duration * 0.034 / 2;
+  height = 32 - distance;
+  return height;
 }
