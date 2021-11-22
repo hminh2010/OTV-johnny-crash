@@ -6,6 +6,13 @@
 #define echoPinX 12
 #define trigPinX 13
 
+int motor1B = 11;
+int motor1F = 10;
+int motor2B = 9;
+int motor2F = 6;
+
+Stepper myStepper(stepsPerRevolution, 3, 4, 5, 8);
+
 // possible heights: 26.5cm, 19.1cm, 14cm
 // max stepper is 60
 
@@ -16,6 +23,8 @@ int distance;
 int height;
 int width1;
 int width2;
+
+int motorStrength = 0; 
 
 void setup() {
 
@@ -28,6 +37,11 @@ void setup() {
     pinMode(trigPinX, OUTPUT); 
     pinMode(echoPinX, INPUT);
     
+    // MOTOR SETUP
+    pinMode(motor1B, OUTPUT);
+    pinMode(motor1F, OUTPUT);
+    pinMode(motor2B, OUTPUT);
+    pinMode(motor2F, OUTPUT);
     
 
     // CONNECTING TO VISION SYSTEM
@@ -46,7 +60,12 @@ void setup() {
 
     // LOOP EACH SIDE TO DETERMINE REFLECTANCE VALUES
 
-    //
+    // FINISH AND MAYBE PLACE ARUCO MARKER
+
+    // START NAVIGATING THE OBSTACLES
+
+    // GO UNDERNEATH THE LIMBO
+
     
 }
 
@@ -71,10 +90,12 @@ void updateLocation() {
 }
 
 /*
-    Turn until reach the angle param
+    Turn until reach the angle param (using ENES vision system)
 */
 void turnUntil(int theta) {
-
+    while (abs(Enes100.location.theta - theta) > 1) {
+        
+    }
 }
 
 /*
@@ -179,4 +200,35 @@ int calculateHeight() {
   distance = duration * 0.034 / 2;
   height = 32 - distance;
   return height;
+}
+
+boolean detectStuck() {
+    updateLocation();
+    if (motorStrength != 0 ) { // then the vehicle should be moving 
+        
+    }
+}
+
+void setForward(int strength) {
+  analogWrite(motor1B, strength);
+  analogWrite(motor1F, 0); 
+  analogWrite(motor2B, strength);
+  analogWrite(motor2F, 0);
+  motorStrength = strength;
+}
+
+void setBackward(int strength) {
+  analogWrite(motor1B, 0);
+  analogWrite(motor1F, strength); 
+  analogWrite(motor2B, 0);
+  analogWrite(motor2F, strength);
+  motorStrength = -strength;
+}
+
+void stopMotors() {
+  analogWrite(motor1B, 0);
+  analogWrite(motor1F, 0); 
+  analogWrite(motor2B, 0);
+  analogWrite(motor2F, 0);
+    motorStrength = 0;
 }
