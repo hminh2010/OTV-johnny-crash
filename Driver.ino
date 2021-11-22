@@ -73,8 +73,38 @@ void updateLocation() {
 /*
     Turn until reach the angle param
 */
-void turnUntil(int theta) {
 
+void setForward(int strength) {
+  analogWrite(motor1a, strength);
+  analogWrite(motor1b, 0); 
+  analogWrite(motor2a, strength);
+  analogWrite(motor2b, 0);
+}
+
+void setBackward(int strength) {
+  analogWrite(motor1a, 0);
+  analogWrite(motor1b, strength); 
+  analogWrite(motor2a, 0);
+  analogWrite(motor2b, strength);
+}
+
+void stopMotors() {
+  analogWrite(motor1a, 0);
+  analogWrite(motor1b, 0); 
+  analogWrite(motor2a, 0);
+  analogWrite(motor2b, 0);
+}
+
+void turnUntil(int theta) {
+  myStepper.step(60);
+  Enes100.updateLocation()
+  while (abs(Enes100.location.theta - theta)
+  {
+    setForward(255);
+    Enes100.updateLocation();
+  }
+  stopMotors();
+  myStepper.step(-60);
 }
 
 /*
