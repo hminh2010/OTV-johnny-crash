@@ -232,3 +232,15 @@ void stopMotors() {
   analogWrite(motor2F, 0);
     motorStrength = 0;
 }
+
+void turnUntil(int theta) {
+  myStepper.step(60);
+  Enes100.updateLocation();
+  while (abs(Enes100.location.theta - theta) > 1)
+  {
+    setForward(255);
+    Enes100.updateLocation();
+  }
+  stopMotors();
+  myStepper.step(-60);
+}
