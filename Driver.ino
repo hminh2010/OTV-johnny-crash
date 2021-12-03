@@ -11,7 +11,7 @@ int motor1F = 10;
 int motor2B = 9;
 int motor2F = 6;
 
-Stepper myStepper(stepsPerRevolution, 3, 4, 5, 8);
+
 
 // possible heights: 26.5cm, 19.1cm, 14cm
 // max stepper is 60
@@ -23,11 +23,14 @@ int distance;
 int height;
 int width1;
 int width2;
+int abnormalSide; // Number 1-4 denoting which side is abnormal, number corresponding to which side depends on mission site location
+boolean startAtTop; 
+int missionTurn;
 
 int motorStrength = 0; 
 
 void setup() {
-
+    Stepper myStepper(STEPS_PER_REV, 3, 4, 5, 8);
     // SENSOR SETUP
 
     // Ultrasonic Y
@@ -43,7 +46,6 @@ void setup() {
     pinMode(motor2B, OUTPUT);
     pinMode(motor2F, OUTPUT);
     
-
     // CONNECTING TO VISION SYSTEM
     while (!Enes100.begin("Johnny Crash", CRASH_SITE, 420, 7, 8)) {
         Enes100.println("Failed to connect, trying again...");
@@ -55,14 +57,86 @@ void setup() {
     // MISSION SITE COORDINATES: Enes100.destination.x; Enes100.destination.y;
 
     // TURN ROBOT TOWARDS MISSION SITE
+    if (Enes100.location.y > 1) {
+      startAtTop = True;
+      turnUntil(-1.5707);
+    } else {
+      startAtTop = False;
+      turnUntil(1.5707);
+    }
+    while (getDistanceX() > 2) {
+      setForward(255);
+    
+    }
+    
 
     // MOVE ROBOT TO MISSION SITE AND DETERMINE X DIMENSION OF THE ABORNAMLITY
+    
+
 
     // LOOP EACH SIDE TO DETERMINE REFLECTANCE VALUES
+    // assumes the robot starts normal to the mission site and facing the x = 0 wall
+    
+    // read the height and read the infrared sensor values
+
+    if (startAtTop) { // if it starts at the top it needs to turn right
+        missionTurn = -90;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+    }
+    
+    height = getDistanceY();
+    for (int count = 1; count < 5; count++) {
+
+        if (isAbnormal()) {
+            abnormalSide = count;
+
+            Enes100.print("Abnormal Side Found: ")
+            Enes100.println(count)
+            break;
+
+        } 
+    }
+    
+    // add code to account for if the robot is even lined up properly 
+    
+    // turn to next side and repeat
+
+    // 
+
 
     // FINISH AND MAYBE PLACE ARUCO MARKER
 
     // START NAVIGATING THE OBSTACLES
+    Enes100.updateLocation();
+    if (Enes100.location.y > 1) {
+        goUntilY(.9);
+        turnUntil(0);
+        goUntilX(.1);
+        turnUntil(M_PI/2);
+        goUntilY(1.9);
+        turnUntil(M_PI);
+        goUntilX(4.0);
+    } else {
+        goUntilY(1.9);
+        turnUntil(M_PI/2);
+        goUntilX(4.0);
+    }
+
+    // SENSE WHEN STUCK
+
+while (Enes100.location.x < 4) {
+    Enes100.updateLocation;
+    double x = Enes100.location.x;
+    Delay (4500);
+    Enes100.updateLocation;
+    if (Enes100.location.X > (x-0.1) && Enes100.location.X < (x+0.1) {
+        stopMotors();
+        setBackward(255);
+        Delay(1000);
+        stopMotors();
+        turnUntil(M_PI);
+        setForward(255);
+    }
+} 
 
     // GO UNDERNEATH THE LIMBO
 
@@ -92,25 +166,43 @@ void updateLocation() {
 /*
     Turn until reach the angle param (using ENES vision system)
 */
+
 void turnUntil(int theta) {
-    while (abs(Enes100.location.theta - theta) > 1) {
-        
-    }
+  myStepper.step(60);
+  Enes100.updateLocation();
+  while (abs(Enes100.location.theta - theta) > 1)
+  {
+    setForward(255);
+    Enes100.updateLocation();
+  }
+  stopMotors();
+  myStepper.step(-60);
 }
 
 /*
     Turn until reach the x param
 */
 void goUntilX(int x) {
-
+    while(Enes100.location.X < (x-0.1) || Enes100.location.X > (x+0.1)) {
+        Enes100.updateLocation();
+        setForward(255);
+    }
+    stopMotors();
 }
 
 /*
     Turn until reach the y param
 */
 void goUntilY(int y) {
-
+    while(Enes100.location.Y < (y-0.1) || Enes100.location.Y > (y+0.1)) {
+        Enes100.updateLocation;
+        setForward(255);
+    }
+    stopMotors();
 }
+
+
+
 /*
     Get distance measured from Ultrasonic sensor on the pole (reads downwards in -y direction)
     This distance is given in centimeters
@@ -198,8 +290,7 @@ int calculateHeight() {
   digitalWrite(trigPin, LOW);
   duration = pulseIn(echoPin, HIGH);
   distance = duration * 0.034 / 2;
-  height = 32 - distance;
-  return height;
+  return 32 - distance;
 }
 
 boolean detectStuck() {
@@ -207,6 +298,22 @@ boolean detectStuck() {
     if (motorStrength != 0 ) { // then the vehicle should be moving 
         
     }
+}
+
+boolean isAbnormal() { // note: black is > 800
+    int sensorValue = 0;
+    totalTakes = 5;
+    for (int count = 0; count < totalTakes; count++) {
+        highReading = determineAbnormalityHigh();
+        lowReading = determineAbnormalityLow()
+        sensorValue += (lowReading > highReading) ? lowReading : highReading; // adds larger value to the average
+    }
+    if (sensorValue / totalTakes < 800){
+        return false;
+        } else {
+        return true;
+    }
+
 }
 
 void setForward(int strength) {
@@ -231,16 +338,4 @@ void stopMotors() {
   analogWrite(motor2B, 0);
   analogWrite(motor2F, 0);
     motorStrength = 0;
-}
-
-void turnUntil(int theta) {
-  myStepper.step(60);
-  Enes100.updateLocation();
-  while (abs(Enes100.location.theta - theta) > 1)
-  {
-    setForward(255);
-    Enes100.updateLocation();
-  }
-  stopMotors();
-  myStepper.step(-60);
 }
