@@ -5,7 +5,7 @@ int motor2a = 9;
 int motor2b = 6;
 
 #include <Stepper.h>
-#include "Enes100.h"
+#include <Enes100.h>
 const int stepsPerRevolution =  200;
 Stepper myStepper(stepsPerRevolution, 3, 4, 5, 8);
 
@@ -24,7 +24,7 @@ void setup() {
 
 void loop() {
   
-  turn90();
+  steerRight(1000);
   delay(10000);
   
 }
@@ -44,19 +44,36 @@ void turn90Left() {
   }
 }
 
-void turn90Left() {
-  for (int i = 0; i < 5; i++) {
-    myStepper.step(60);
+void turn90Right() {
+  for (int i = 0; i < 4; i++) {
+    myStepper.step(-64);
     setForward(200);
     delay(1000);
     stopMotors();
     
-    myStepper.step(-64);
+    myStepper.step(64);
     setBackward(200);
     delay(1000);
     stopMotors();
   }
 }
+
+
+void steerRight(float desiredTime) { //not functional
+  float storedTime = 0;
+  float subtractTime = millis();
+  myStepper.step(60);
+  Enes100.updateLocation();
+  while (desiredTime > storedTime)
+  {
+    setForward(255);
+    storedTime = millis() - subtractTime;
+  }
+  stopMotors();
+  myStepper.step(-64);
+}
+
+
 void turn90_small() {
   for (int i = 0; i < 11; i++) {
     myStepper.step(60);
