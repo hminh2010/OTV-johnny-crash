@@ -1,8 +1,8 @@
 #include "Enes100.h"
 #include <Stepper.h>
 
-#define echoPinY 2
-#define trigPinY 7
+#define echoPinY 0
+#define trigPinY 1
 #define echoPinX 12
 #define trigPinX 13
 
@@ -316,7 +316,18 @@ boolean isAbnormal() { // note: black is > 800
 
 }
 
-void setForward(int strength) {
+int getWidth() {
+    updateLocation();
+    int d1 = getDistanceX();
+    int d2 = abs(Enes100.destination.x - Enes100.location.x);
+    return 2*(d2-d1);
+}
+
+int calculateLength(int height, int width) {
+    return 7049 / height / width;
+}
+
+void setBackward(int strength) {
   analogWrite(motor1B, strength);
   analogWrite(motor1F, 0); 
   analogWrite(motor2B, strength);
@@ -324,7 +335,7 @@ void setForward(int strength) {
   motorStrength = strength;
 }
 
-void setBackward(int strength) {
+void setForward(int strength) {
   analogWrite(motor1B, 0);
   analogWrite(motor1F, strength); 
   analogWrite(motor2B, 0);
