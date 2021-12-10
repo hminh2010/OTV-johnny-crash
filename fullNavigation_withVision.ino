@@ -53,35 +53,60 @@ void setup() {
     Enes100.println("Now attempting turn");
     
     if (startAtTop) {
-      turnUntil(M_PI/2);
-    } else {
       turnUntil(-M_PI/2);
+    } else {
+      turnUntil(M_PI/2);
     } 
 
     Enes100.print("After turn Theta: ");
     Enes100.println(Enes100.location.theta);
-    
-    setBackward(255); delay(2000); 
+    Enes100.print(getWidth());
+  setForward(255);
   
-  if (startAtTop) { 
-    turnUntil(M_PI/2); // go to mission
+    
+  boolean arrivedAtMission = false;  
+  while (!arrivedAtMission) {
+      if (getDistanceX() < 10) {
+        stopMotors();
+      arrivedAtMission = true;
+      Enes100.println("arrived at mission");
+    }
   }
-
+  
+  delay(10000);
+  Enes100.println("Turning to wall 1");
+  if (startAtTop) { 
+    turnUntil(M_PI/2);
+  }
+  Enes100.println("Turning east");
   turnUntil(0);
 
   setForward(255);
-  delay(2000);
-  stopMotors();
+  delay(3000);
+  stopMotors(); 
+  
+  Enes100.println("Turning to wall 2");
+  turnUntil(M_PI/2);
+  
+  setForward(255);
+
+  Enes100.println("Going to wall");
+  
+  boolean reachedWall = false;
+  while (!reachedWall) {
+    if (getDistanceX() < 5) {
+      stopMotors();
+      reachedWall = true;
+    }
+  }
+
+  turnUntil(0);
+  setForward(255);
 //
 //  boolean arrivedAtMission = false;
 //  boolean arrivedAtEnd = false;
 //  
-//  while (!arrivedAtMission) {
-//      if (getDistanceX() < 10) {
-//      setForward(0);
-//      arrivedAtMission = true;
-//    }
-//  }
+
 //  
 //  delay(10000); 
 //  
@@ -98,13 +123,7 @@ void setup() {
 //
 //  setForward(255);
 //
-//  while (!arrivedAtEnd) {
-//    
-//    if (getDistanceX() < 10) {
-//      setForward(0);
-//      arrivedAtEnd = true;
-//    }
-//  }
+
   
 }
 
@@ -115,7 +134,7 @@ void loop() {
 
 void turnUntil(int theta) {
   Enes100.updateLocation();
-  while (abs(Enes100.location.theta - theta) > 0.4)
+  while (abs(Enes100.location.theta - theta) > 0.6)
   {
     turn1Iter();
     Enes100.println("1 iter");
@@ -135,6 +154,26 @@ int getDistanceX() {
     duration = pulseIn(echoPinX, HIGH);
     distance = duration * 0.034 / 2;
     return distance;
+}
+
+void updateLocation() {
+    if (Enes100.updateLocation()) {
+        Enes100.print("Updated Location: ");
+        Enes100.print(Enes100.location.x);
+        Enes100.print(",");
+        Enes100.print(Enes100.location.y);
+        Enes100.print(" Theta: ");
+        Enes100.print(Enes100.location.theta);
+    } else {
+        Enes100.print("Update Location failed.");
+    }
+}
+
+int getWidth() {
+    updateLocation();
+    int d1 = getDistanceX();
+    int d2 = abs(Enes100.destination.x - Enes100.location.x);
+    return 2*(d2-d1);
 }
 
 void turn180() {
@@ -180,7 +219,7 @@ void turn90Right() {
 void turn1Iter() { //est. 15 degrees
   myStepper.step(-30);
   setForward(200);
-  delay(1000);
+  delay(700);
   stopMotors();
   
   myStepper.step(80);
@@ -188,15 +227,11 @@ void turn1Iter() { //est. 15 degrees
   delay(1000);
   stopMotors();
 
-  myStepper.step(-80);
+  myStepper.step(-50);
   setForward(200);
-  delay(1000);
+  delay(700);
   stopMotors();
 
-  myStepper.step(30);
-  setBackward(200);
-  delay(1000);
-  stopMotors();
   
 }
 
